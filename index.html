@@ -5,72 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="stylesheet" href="//at.alicdn.com/t/font_1198990_39uh8tina4n.css">
+  <link rel="stylesheet" href="./userBoard.css">
+  <link rel="stylesheet" href="./common.css">
+  <link rel="stylesheet" href="./search.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <title>GithubTop项目</title>
+  <title>GithubTop仓库</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
 
-    html,
-    body {
-      font-size: 16px;
-      line-height: 1.2;
-      height: 100%;
-    }
-
-    a {
-      text-decoration: none;
-      color: #333;
-    }
-
-    main {
-      height: calc(100vh - 50px);
-      overflow: scroll;
-      -webkit-overflow-scrolling: touch;
-      /*手机端弹性滚动*/
-    }
-
-    main>section {
-      display: none;
-      background: #F4F4F5;
-    }
-
-    main>section:first-child {
-      display: block;
-    }
-
-    #repoBoard {
-      height: calc(100vh - 50px);
-      overflow: scroll;
-    }
-
-    footer {
-      position: absolute;
-      bottom: 0;
-      height: 50px;
-      width: 100%;
-      border-top: 1px solid #ccc;
-      display: flex;
-    }
-
-    footer>div {
-      flex: 1;
-      text-align: center;
-    }
-
-    footer .active {
-      color: #ff5722;
-    }
-
-    footer>div>span {
-      display: block;
-      padding-top: 5px;
-    }
-
-    .item {}
 
     .item .order {
       display: flex;
@@ -79,14 +20,14 @@
       align-items: center;
     }
 
-    .item .order span {
+    #repoBoard.item .order span {
       display: inline-block;
       padding: 10px 20px;
       color: #587D66;
       font-weight: bold;
     }
 
-    .item>a {
+    #repoBoard .item>a {
       display: flex;
       background: #fff;
       margin: 10px 16px;
@@ -94,7 +35,7 @@
       border-radius: 4px;
     }
 
-    .item .detail {
+    #repoBoard .item .detail {
       padding-left: 10px;
       width: 85%;
     }
@@ -147,37 +88,6 @@
       display: inline-block;
       animation: 1s rotate linear infinite;
     }
-
-    #search {
-      height: calc(100% - 45px);
-    }
-
-    section .search-area {
-      color: #333;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #ccc;
-      position: relative;
-    }
-
-    section .search-area input {
-      width: calc(100% - 50px);
-      padding: 8px;
-      background-color: #eee;
-      border: none;
-      border-radius: 2px;
-      box-shadow: none;
-      outline: none;
-    }
-
-    section .search-area .button {
-      position: absolute;
-      right: 0;
-      padding: 8px 10px;
-      background: #FF5722;
-      color: #fff;
-      border-radius: 2px;
-      cursor: pointer;
-    }
   </style>
 </head>
 
@@ -187,7 +97,7 @@
       <div class="container"></div>
       <div class="loading"><span class="iconfont icon-loading"></span></div>
     </section>
-    <section id="beimei">
+    <section id="userBoard">
       <div class="container"></div>
       <div class="loading"><span class="iconfont icon-loading"></span></div>
     </section>
@@ -198,18 +108,21 @@
       <div class="search-result">
         <div class="loading"><span class="iconfont icon-loading"></span></div>
       </div>
-      <input type="text">
     </section>
   </main>
   <footer>
-    <div class="active"><span class="iconfont icon-top250"></span><span>Top250</span></div>
-    <div><span class="iconfont icon-us"></span><span>北美</span></div>
-    <div><span class="iconfont icon-search"></span><span>搜索</span></div>
+    <div><span class="iconfont icon-top250"></span><span>Top Repos</span></div>
+    <div class="active"><span class="iconfont icon-us"></span><span>Top Users</span></div>
+    <div><span class="iconfont icon-search"></span><span>Search</span></div>
   </footer>
 
 </body>
 
 <script>
+
+  var helpers={
+
+  }
   var repoBoard = {
     init: function () {
       this.$element = $('#repoBoard')
@@ -304,6 +217,85 @@
       return this.$element.find('.container').height() <= this.$element.height() + this.$element.scrollTop() + 20
     }
   }
+  var userBoard = {
+    init: function () {
+      this.$element = $('#userBoard')
+      this.page = 1
+      this.count = 30
+      this.isFinish = false
+      this.isLoading = false      
+      this.start()
+      this.bind()
+    },
+    start: function () {
+      var _this = this
+      this.getData(function (data) {
+        _this.renderData(data)
+      })
+    },
+    bind: function () {
+      var _this = this
+      var clock
+      this.$element.scroll(function () {
+        console.log(1)
+        if (clock) {//函数节流
+          clearTimeout(clock)
+        }
+        clock = setTimeout(function () {
+          //判断页面是否滚动到底部
+          if (_this.isToBottom()) {
+            _this.start()
+          }
+        }, 300)
+      })
+    },
+    isToBottom: function () {
+      return this.$element.find('.container').height() <= this.$element.height() + this.$element.scrollTop() + 20
+    },
+    getData: function (callback) {
+      var _this = this
+      if (_this.isLoading) return
+      _this.isLoading = true
+      _this.$element.find('.loading').show()
+      $.ajax({
+        url: 'https://api.github.com/search/users?q=followers:>1000+location:china+language:javascript',
+        data: { page: this.page },
+        ///https://api.github.com/search/users?q=ruanyf in:login
+        dataType: 'jsonp'
+      }).done(function (ret) {
+        if (_this.index >= ret.total) {
+          _this.isFinish = true
+        }
+        callback && callback(ret)
+        _this.page++
+        _this.isLoading = false
+      }).fail(function () {
+        console.log('数据异常')
+      }).always(function () {
+        _this.$element.find('.loading').hide()
+      })
+    },
+    renderData(data) {
+      var _this = this
+      data.data.items.forEach(function (item, index) {
+        var $node = _this.createNode(item, (_this.page - 1) * _this.count + index + 1)
+        _this.$element.find('.container').append($node)
+      })
+    },
+    createNode: function (subject, index) {
+      var $node = $(`<div class="item">
+          <a href="https://github.com/TryGhost/Ghost">
+            <div class="cover"><img src="" alt=""></div>
+            <div class="detail">
+            <h2>Ghost</h2>
+          </a>
+        </div> `)
+      $node.find('.cover img').attr('src', subject.avatar_url)
+      $node.find('a').attr('href', subject.html_url)
+      $node.find('.detail h2').text(subject.login)
+      return $node
+    }
+  }
   var search = {
     init: function () {
       this.$element = $('#search')
@@ -324,7 +316,6 @@
         _this.render(data)
       })
     },
-
     getData: function (callback) {
       var _this = this
       _this.$element.find('.loading').show()
@@ -390,86 +381,7 @@
         _this.$element.find('.search-result').append($node)
       })
     },
-  }
-
-  var usBox = {
-    init: function () {
-      this.$element = $('#beimei')
-      this.start()
-    },
-    bind: function () { },
-    start: function () {
-      var _this = this
-      this.getData(function (data) {
-        _this.render(data)
-      })
-
-    },
-    getData: function (callback) {
-      var _this = this
-      if (_this.isLoading) return
-      _this.isLoading = true
-      _this.$element.find('.loading').show()
-      $.ajax({
-        url: 'https://mockapi.eolinker.com/LZnfTVg70dd4a21e2784670731d4002576cd563faa839ff/us_box',
-        dataType: 'json'
-      }).done(function (ret) {
-        _this.index += 20
-        if (_this.index >= ret.total) {
-          _this.isFinish = true
-        }
-        callback && callback(ret)
-      }).fail(function () {
-        console.log('数据异常')
-      }).always(function () {
-        _this.$element.find('.loading').hide()
-      })
-    },
-    render: function (data) {
-      var _this = this
-      data.subjects.forEach(function (movie) {
-        var tpl = `
-          <div class="item">
-            <a href="">
-              <div class="cover">
-                <img src="" alt="">
-              </div>
-              <div class="detail">
-                <h2></h2>
-                <div class="extra"><span class="score"></span> 分/ <span class="collect"></span>收藏</div>
-                <div class="extra"><span class="year"></span> <span class="type"></span></div>
-                <div class="extra">导演：<span class="director"></span></div>
-                <div class="extra">主演：<span class="actor"></span></div>
-              </div>
-            </a>
-          </div>`
-        var $node = $(tpl)
-        var movie = movie.subject
-        $node.find('.detail h2').text(movie.title)
-        $node.find('.cover img').attr('src', movie.images.medium)
-        $node.find('.score').text(movie.rating.average)
-        $node.find('.collect').text(movie.collect_count)
-        $node.find('.year').text(movie.year)
-        $node.find('.type').text(movie.genres.join(' /'))
-        $node.find('.director').text(function () {
-          var directorsArr = []
-          movie.directors.forEach(function (item) {
-            directorsArr.push(item.name)
-          })
-          return directorsArr.join('、 ')
-        })
-
-        $node.find('.actor').text(function () {
-          var actorArr = []
-          movie.casts.forEach(function (item) {
-            actorArr.push(item.name)
-          })
-          return actorArr.join('、 ')
-        })
-        _this.$element.find('.container').append($node)
-      })
-    },
-  }
+  }  
   var app = {
     init: function () {
       this.$tabs = $('footer>div')
@@ -477,8 +389,9 @@
       this.bind()
 
       repoBoard.init()
+      userBoard.init()
       search.init()
-      usBox.init()
+
     },
     bind: function () {
       var _this = this

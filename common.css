@@ -1,0 +1,64 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-size: 16px;
+  line-height: 1.2;
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+main {
+  height: calc(100vh - 50px);
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+  /*手机端弹性滚动*/
+}
+
+main>section {
+  display: none;
+  background: #F4F4F5;
+}
+
+main>section:first-child {
+  display: block;
+}
+
+#repoBoard{
+  height: calc(100vh - 50px);
+  overflow: scroll;
+  display: none;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  height: 50px;
+  width: 100%;
+  box-shadow: 0px -1px 10px 0px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+footer>div {
+  flex: 1;
+  text-align: center;
+}
+
+footer .active {
+  color: #ff5722;
+}
+
+footer>div>span {
+  display: block;
+  padding-top: 2px;
+}

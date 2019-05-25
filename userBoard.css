@@ -1,0 +1,38 @@
+#userBoard .container{
+  padding-top: 0.1px;
+}
+#userBoard {
+  display: block;
+  height: calc(100vh - 50px);
+  overflow: scroll;
+}
+#userBoard .container .item{
+  display: flex;
+  padding: 10px;
+  /* box-shadow: 1px 1px 4px 1px rgba(0,0,0,0.1); */
+  background: #fff;
+  margin: 10px;
+}
+#userBoard .container .item a{}
+#userBoard .cover{
+  margin-right: 16px;
+
+}
+#userBoard .cover img{
+  width: 40px;
+  vertical-align: middle;
+}
+#userBoard .container .item.detail{
+
+}
+
+#userBoard .detail{
+  
+}
+
+#userBoard .detail a{
+  
+}
+#userBoard .detail h2{
+  
+}
