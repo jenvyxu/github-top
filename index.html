@@ -5,98 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="stylesheet" href="//at.alicdn.com/t/font_1198990_39uh8tina4n.css">
-  <link rel="stylesheet" href="./userBoard.css">
   <link rel="stylesheet" href="./common.css">
-  <link rel="stylesheet" href="./search.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <title>GithubTop仓库</title>
-  <style>
-    .item {
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
-      padding-top: 10px;
-    }
-    .item .cover{
-      margin: 0 4px;
-    }
-    .item .cover,
-    .item .cover img {
-      width: 50px;
-      border-radius: 4px;
-      vertical-align: middle;
-    }
+  <title>Github看板</title>
 
-    .item>a {
-      display: flex;
-    }
-
-    .item .order {
-      display: flex;
-      align-items: center;
-    }
-
-    .item .order span {
-      display: inline-block;
-      text-align: center;
-      min-width: 16px;
-      padding: 1px 4px;
-      color: #fff;
-      background: green;
-    }
-
-    .item .detail {
-      padding: 0 10px;
-      flex-grow: 1;
-    }
-
-    .item .detail h2 {
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-
-    .item .detail .extra {
-      color: #999;
-      margin-top: 4px;
-    }
-
-    .item .detail .extra {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .item .detail .star-count {
-      margin-left: 4px;
-    }
-
-    .item .detail .icon-star {
-      color: #EEE170;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 10px;
-      display: none;
-    }
-
-    @keyframes rotate {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-    .loading .iconfont {
-      display: inline-block;
-      animation: 1s rotate linear infinite;
-    }
-
-    #userBoard .item{
-      display: flex;
-    }
-
-  </style>
 </head>
 
 <body>
@@ -114,13 +26,14 @@
         <input type="text" placeholder="Search Repo"><span class="button">Search</span>
       </div>
       <div class="search-result">
+        <div class="container"></div>
         <div class="loading"><span class="iconfont icon-loading"></span></div>
       </div>
     </section>
   </main>
   <footer>
-    <div><span class="iconfont icon-top250"></span><span>Top Repos</span></div>
-    <div class="active"><span class="iconfont icon-us"></span><span>Top Users</span></div>
+    <div class="active"><span class="iconfont icon-top250"></span><span>Top Repos</span></div>
+    <div><span class="iconfont icon-us"></span><span>Top Users</span></div>
     <div><span class="iconfont icon-search"></span><span>Search</span></div>
   </footer>
 
@@ -245,7 +158,6 @@
       var _this = this
       var clock
       this.$element.scroll(function () {
-        console.log(1)
         if (clock) {//函数节流
           clearTimeout(clock)
         }
@@ -253,6 +165,7 @@
           //判断页面是否滚动到底部
           if (_this.isToBottom()) {
             _this.start()
+            console.log('daodi')
           }
         }, 300)
       })
@@ -268,7 +181,6 @@
       $.ajax({
         url: 'https://api.github.com/search/users?q=followers:>1000+location:china+language:javascript',
         data: { page: this.page },
-        ///https://api.github.com/search/users?q=ruanyf in:login
         dataType: 'jsonp'
       }).done(function (ret) {
         if (_this.index >= ret.total) {
@@ -307,8 +219,9 @@
   var search = {
     init: function () {
       this.$element = $('#search')
-      this.$content = this.$element.find('.container')
-      this.page = 1
+      this.$content = $('.search-result')
+      this.keyword = ''
+      this.page = 0
       this.count = 30
       this.isLoading = false
       this.isFinish = false
@@ -324,22 +237,33 @@
         clock = setTimeout(function () {
           //判断页面是否滚动到底部
           if (_this.isToBottom()) {
-            _this.start()
+            _this.getData(function (result) {
+              _this.renderData(result.data)
+            })
           }
         }, 300)
       })
-      this.$element.find('.search-area .button').on('click', function () {
-        _this.getData(function (result) {
-          console.log(result.data)
-          _this.renderData(result.data)
+      this.$element.find('.search-area input').on('keyup', function (e) {
+        if (e.key === 'Enter') {
+          _this.getData(function (result) {
+            _this.page = 0
+            _this.$element.find('.item').remove()
+            _this.renderData(result.data)
+          })
+        }
+      }),
+        this.$element.find('.search-area .button').on('click', function () {
+          _this.getData(function (result) {
+            _this.page = 0
+            _this.$element.find('.item').remove()
+            _this.renderData(result.data)
+          })
         })
-      })
     },
 
     getData: function (callback) {
       var _this = this
-      var keyword = this.$element.find('.search-area input').val()
-      console.log(keyword)
+      keyword = _this.keyword || _this.$element.find('.search-area input').val()
       if (_this.isLoading) return
       _this.isLoading = true
       _this.$element.find('.loading').show()
@@ -350,7 +274,6 @@
         if (_this.page >= ret.total) {
           _this.isFinish = true
         }
-        console.log(ret)
         callback && callback(ret)
         _this.page++
       }).fail(function () {
@@ -384,8 +307,8 @@
     renderData: function (data) {
       var _this = this
       data.items.forEach(function (item, index) {
-        var $node = _this.createNode(item, (_this.page - 1) * _this.count + index + 1)
-        _this.$element.find('.search-result').append($node)
+        var $node = _this.createNode(item, _this.page * _this.count + index + 1)
+        _this.$element.find('.container').append($node)
       })
     },
     toThousand: function (num) { //123456 => 123.4k
@@ -395,10 +318,9 @@
       return bigNum + '.' + smallNum + 'k'
     },
     isToBottom: function () {
-      return this.$element.find('.container').height() <= this.$element.height() + this.$element.scrollTop() + 20
+      return this.$element.find('.search-result').height() + this.$element.find('.search-area').height() <= this.$element.height() + this.$element.scrollTop() + 20
     }
   }
-
   var app = {
     init: function () {
       this.$tabs = $('footer>div')

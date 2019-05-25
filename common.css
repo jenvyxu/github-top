@@ -58,8 +58,158 @@ footer>div>span {
   padding-top: 2px;
 }
 
-#repoBoard{
+#repoBoard,#userBoard{
   height: calc(100vh - 50px);
   overflow: scroll;
+}
+
+.item {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+.item .cover{
+  margin: 0 4px;
+}
+.item .cover,
+.item .cover img {
+  width: 40px;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.item>a {
+  display: flex;
+}
+
+.item .order {
+  display: flex;
+  align-items: center;
+}
+
+.item .order span {
+  display: inline-block;
+  text-align: center;
+  min-width: 16px;
+  padding: 1px 4px;
+  color: #fff;
+  background: green;
+}
+
+.item .detail {
+  padding: 0 10px;
+  flex-grow: 1;
+}
+
+.item .detail h2 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.item .detail .extra {
+  color: #999;
+  margin-top: 4px;
+}
+
+.item .detail .extra {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.item .detail .star-count {
+  margin-left: 4px;
+}
+
+.item .detail .icon-star {
+  color: #EEE170;
+}
+
+.loading {
+  text-align: center;
+  padding: 10px;
   display: none;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loading .iconfont {
+  display: inline-block;
+  animation: 1s rotate linear infinite;
+}
+
+#userBoard .item{
+  display: flex;
+}
+
+/* 搜索面板 */
+#search {
+  background: #fff;
+  display: none;
+  height: calc(100vh - 50px);
+  overflow: scroll;
+
+}
+.search-area {
+  color: #333;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+}
+
+.search-area input {
+  flex-grow: 1;
+  width: calc(100% - 50px);
+  padding: 8px;
+  margin-right: 2px;
+  background-color: #eee;
+  border: none;
+  border-radius: 2px;
+  box-shadow: none;
+  outline: none;
+}
+
+.search-area .button {
+  display: block;
+  width: 65px;
+  text-align: center;
+  padding: 8px 10px;
+  background: #FF5722;
+  color: #fff;
+  border-radius: 2px;
+}
+
+.search-area {
+  color: #333;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+}
+
+.search-area input {
+  flex-grow: 1;
+  width: calc(100% - 50px);
+  padding: 8px;
+  margin-right: 2px;
+  background-color: #eee;
+  border: none;
+  border-radius: 2px;
+  box-shadow: none;
+  outline: none;
+}
+
+.search-area .button {
+  display: block;
+  width: 65px;
+  text-align: center;
+  padding: 8px 10px;
+  background: #FF5722;
+  color: #fff;
+  border-radius: 2px;
 }
