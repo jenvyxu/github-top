@@ -11,53 +11,58 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <title>GithubTop仓库</title>
   <style>
+    .item {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      padding-top: 10px;
+    }
+    .item .cover{
+      margin: 0 4px;
+    }
+    .item .cover,
+    .item .cover img {
+      width: 50px;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
 
+    .item>a {
+      display: flex;
+    }
 
     .item .order {
       display: flex;
-      width: 15%;
-      justify-content: center;
       align-items: center;
     }
 
-    #repoBoard.item .order span {
+    .item .order span {
       display: inline-block;
-      padding: 10px 20px;
-      color: #587D66;
-      font-weight: bold;
+      text-align: center;
+      min-width: 16px;
+      padding: 1px 4px;
+      color: #fff;
+      background: green;
     }
 
-    #repoBoard .item>a {
-      display: flex;
-      background: #fff;
-      margin: 10px 16px;
-      padding: 8px;
-      border-radius: 4px;
-    }
-
-    #repoBoard .item .detail {
-      padding-left: 10px;
-      width: 85%;
+    .item .detail {
+      padding: 0 10px;
+      flex-grow: 1;
     }
 
     .item .detail h2 {
-      font-size: 18px;
-      color: #2C64CF;
+      font-size: 16px;
       margin-bottom: 4px;
     }
 
-    .item .detail .description {
-      color: #aaa;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .item .detail .extra {
+      color: #999;
+      margin-top: 4px;
     }
 
     .item .detail .extra {
-
-      font-size: 14px;
-      margin-top: 4px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
     }
 
     .item .detail .star-count {
@@ -78,16 +83,19 @@
       0% {
         transform: rotate(0deg);
       }
-
       100% {
         transform: rotate(360deg);
       }
     }
-
     .loading .iconfont {
       display: inline-block;
       animation: 1s rotate linear infinite;
     }
+
+    #userBoard .item{
+      display: flex;
+    }
+
   </style>
 </head>
 
@@ -103,7 +111,7 @@
     </section>
     <section id="search">
       <div class="search-area">
-        <input type="text" placeholder="搜索电影"><span class="button">搜索</span>
+        <input type="text" placeholder="Search Repo"><span class="button">Search</span>
       </div>
       <div class="search-result">
         <div class="loading"><span class="iconfont icon-loading"></span></div>
@@ -120,7 +128,7 @@
 
 <script>
 
-  var helpers={
+  var helpers = {
 
   }
   var repoBoard = {
@@ -223,7 +231,7 @@
       this.page = 1
       this.count = 30
       this.isFinish = false
-      this.isLoading = false      
+      this.isLoading = false
       this.start()
       this.bind()
     },
@@ -299,89 +307,98 @@
   var search = {
     init: function () {
       this.$element = $('#search')
-      this.keyword = ''
+      this.$content = this.$element.find('.container')
+      this.page = 1
+      this.count = 30
+      this.isLoading = false
+      this.isFinish = false
       this.bind()
-      this.start()
     },
     bind: function () {
       var _this = this
-      this.$element.find('.button').click(function () {
-        _this.keyword = _this.$element.find('input').val()
-        _this.start()
+      var clock
+      this.$element.scroll(function () {
+        if (clock) {//函数节流
+          clearTimeout(clock)
+        }
+        clock = setTimeout(function () {
+          //判断页面是否滚动到底部
+          if (_this.isToBottom()) {
+            _this.start()
+          }
+        }, 300)
+      })
+      this.$element.find('.search-area .button').on('click', function () {
+        _this.getData(function (result) {
+          console.log(result.data)
+          _this.renderData(result.data)
+        })
       })
     },
-    start: function () {
-      var _this = this
-      this.getData(function (data) {
-        _this.render(data)
-      })
-    },
+
     getData: function (callback) {
       var _this = this
+      var keyword = this.$element.find('.search-area input').val()
+      console.log(keyword)
+      if (_this.isLoading) return
+      _this.isLoading = true
       _this.$element.find('.loading').show()
       $.ajax({
-        url: '',
-        dataType: 'json',
-        data: {
-          q: _this.keyword
-        }
+        url: `https://api.github.com/search/repositories?q=${keyword}+language:javascript&sort=stars&order=desc&page=${_this.page}`,
+        dataType: 'jsonp'
       }).done(function (ret) {
-        _this.index += 20
-        if (_this.index >= ret.total) {
+        if (_this.page >= ret.total) {
           _this.isFinish = true
         }
+        console.log(ret)
         callback && callback(ret)
+        _this.page++
       }).fail(function () {
         console.log('数据异常')
       }).always(function () {
+        _this.isLoading = false
         _this.$element.find('.loading').hide()
       })
     },
-    render: function (data) {
+    createNode: function (subject, index) {
+      var tpl = `
+        <div class="item">
+          <a href="https://github.com/TryGhost/Ghost">
+            <div class="order"><span>1</span></div>
+            <div class="detail">
+              <h2>Ghost</h2>
+              <div class="description">Knockout makes it easier to create rich, responsive UIs with JavaScript</div>
+              <div class="extra"><span class="iconfont icon-star"></span><span class="star-count">4196</span></div>  
+           </div>
+         </a>
+        </div> `
+      var $node = $(tpl)
+      $node.find('.order span').text(index)
+      $node.find('a').attr('href', subject.html_url)
+      $node.find('.detail h2').text(subject.name)
+      $node.find('.detail .description').text(subject.description)
+      $node.find('.detail .collection').text(this.toThousand(subject.collect_count))
+      $node.find('.detail .star-count').text(this.toThousand(subject.stargazers_count))
+      return $node
+    },
+    renderData: function (data) {
       var _this = this
-      data.subjects.forEach(function (movie) {
-        var tpl = `
-          <div class="item">
-            <a href="">
-              <div class="cover">
-                <img src="" alt="">
-              </div>
-              <div class="detail">
-                <h2></h2>
-                <div class="extra"><span class="score"></span> 分/ <span class="collect"></span>收藏</div>
-                <div class="extra"><span class="year"></span> <span class="type"></span></div>
-                <div class="extra">导演：<span class="director"></span></div>
-                <div class="extra">主演：<span class="actor"></span></div>
-              </div>
-            </a>
-          </div>`
-        var $node = $(tpl)
-        var movie = movie.subject
-        $node.find('.detail h2').text(movie.title)
-        $node.find('.cover img').attr('src', movie.images.medium)
-        $node.find('.score').text(movie.rating.average)
-        $node.find('.collect').text(movie.collect_count)
-        $node.find('.year').text(movie.year)
-        $node.find('.type').text(movie.genres.join(' /'))
-        $node.find('.director').text(function () {
-          var directorsArr = []
-          movie.directors.forEach(function (item) {
-            directorsArr.push(item.name)
-          })
-          return directorsArr.join('、 ')
-        })
-
-        $node.find('.actor').text(function () {
-          var actorArr = []
-          movie.casts.forEach(function (item) {
-            actorArr.push(item.name)
-          })
-          return actorArr.join('、 ')
-        })
+      data.items.forEach(function (item, index) {
+        var $node = _this.createNode(item, (_this.page - 1) * _this.count + index + 1)
         _this.$element.find('.search-result').append($node)
       })
     },
-  }  
+    toThousand: function (num) { //123456 => 123.4k
+      if (num <= 1000) return
+      var bigNum = Math.floor(num / 1000)
+      var smallNum = String(num % 1000).substr(0, 1)
+      return bigNum + '.' + smallNum + 'k'
+    },
+    isToBottom: function () {
+      return this.$element.find('.container').height() <= this.$element.height() + this.$element.scrollTop() + 20
+    }
+  }
+
   var app = {
     init: function () {
       this.$tabs = $('footer>div')

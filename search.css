@@ -1,17 +1,21 @@
 #search {
   height: calc(100vh - 50px);
+  background: #fff;
+  display: block;
 }
 
-section .search-area {
+.search-area {
   color: #333;
   padding-bottom: 10px;
   border-bottom: 1px solid #ccc;
-  position: relative;
+  display: flex;
 }
 
-section .search-area input {
+.search-area input {
+  flex-grow: 1;
   width: calc(100% - 50px);
   padding: 8px;
+  margin-right: 2px;
   background-color: #eee;
   border: none;
   border-radius: 2px;
@@ -19,12 +23,12 @@ section .search-area input {
   outline: none;
 }
 
-section .search-area .button {
-  position: absolute;
-  right: 0;
+.search-area .button {
+  display: block;
+  width: 65px;
+  text-align: center;
   padding: 8px 10px;
   background: #FF5722;
   color: #fff;
   border-radius: 2px;
-  cursor: pointer;
 }
