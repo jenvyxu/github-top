@@ -4,7 +4,7 @@
   "description": "预览地址：https://jenvyxu.github.io/douban-top250/index.html",
   "private": true,
   "dependencies": {
-    "ansi-regex": "^3.0.0",
+    "ansi-regex": "^6.0.1",
     "ansi-styles": "^3.2.1",
     "arr-diff": "^4.0.0",
     "arr-flatten": "^1.1.0",
