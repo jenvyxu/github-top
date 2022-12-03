@@ -21,7 +21,7 @@
     "copy-descriptor": "^0.1.1",
     "core-util-is": "^1.0.2",
     "decamelize": "^1.2.0",
-    "decode-uri-component": "^0.2.0",
+    "decode-uri-component": "^0.2.1",
     "detect-file": "^1.0.0",
     "emojis-list": "^2.1.0",
     "escape-string-regexp": "^1.0.5",
